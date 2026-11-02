@@ -1,0 +1,59 @@
+/*FIFO Page Replacement Algorithm*/
+
+
+# FIFO Page Replacement
+
+pages = list(map(int, input("Enter page reference string: ").split()))
+frames = int(input("Enter number of frames: "))
+
+memory = []
+page_faults = 0
+
+for page in pages:
+
+    if page not in memory:
+        page_faults += 1
+
+        if len(memory) < frames:
+            memory.append(page)
+        else:
+            memory.pop(0)
+            memory.append(page)
+
+    print("Page:", page, "Frames:", memory)
+
+print("\nTotal Page Faults:", page_faults)
+print("Total Page Hits:", len(pages) - page_faults)
+
+/*LRU Page Replacement Algorithm*/
+
+# LRU Page Replacement
+
+pages = list(map(int, input("Enter page reference string: ").split()))
+frames = int(input("Enter number of frames: "))
+
+memory = []
+page_faults = 0
+
+for page in pages:
+
+    if page not in memory:
+        page_faults += 1
+
+        if len(memory) < frames:
+            memory.append(page)
+        else:
+            memory.pop(0)
+            memory.append(page)
+
+    else:
+        memory.remove(page)
+        memory.append(page)
+
+    print("Page:", page, "Frames:", memory)
+
+print("\nTotal Page Faults:", page_faults)
+print("Total Page Hits:", len(pages) - page_faults)
+
+
+

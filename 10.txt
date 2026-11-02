@@ -1,0 +1,72 @@
+/**/
+import multiprocessing
+import time
+
+def receiver(conn):
+    message = conn.recv()
+    conn.send("Message received")
+    conn.close()
+
+if __name__ == "__main__":
+    parent_conn, child_conn = multiprocessing.Pipe()
+
+    p = multiprocessing.Process(target=receiver, args=(child_conn,))
+    p.start()
+
+    message = "Hello from Parent Process"
+
+    start = time.perf_counter()
+
+    parent_conn.send(message)
+    reply = parent_conn.recv()
+
+    end = time.perf_counter()
+
+    print("Received:", reply)
+    print("Pipe Communication Time:", round(end-start, 6), "seconds")
+
+    p.join()
+    parent_conn.close()
+
+
+/**/
+
+import multiprocessing
+from multiprocessing import shared_memory
+import time
+
+def sender(name):
+    shm = shared_memory.SharedMemory(name=name)
+    shm.buf[:5] = b"HELLO"
+    shm.close()
+
+if __name__ == "__main__":
+    shm = shared_memory.SharedMemory(create=True, size=5)
+
+    p = multiprocessing.Process(target=sender, args=(shm.name,))
+
+    start = time.perf_counter()
+
+    p.start()
+    p.join()
+
+    message = bytes(shm.buf[:5]).decode()
+
+    end = time.perf_counter()
+
+    print("Received:", message)
+    print("Shared Memory Communication Time:",
+          round(end-start, 6), "seconds")
+
+    shm.close()
+    shm.unlink()
+
+Explanation
+Code	Meaning
+SharedMemory()	Creates shared memory
+shm.name	Gets shared memory name
+shm.buf	Accesses shared memory data
+p.start()	Starts child process
+p.join()	Waits for child process
+perf_counter()	Measures execution time
+shm.unlink()	Deletes shared memory

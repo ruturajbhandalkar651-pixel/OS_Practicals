@@ -1,0 +1,159 @@
+/*input from user*/
+
+import threading
+import time
+
+read_count = 0
+shared_data = 0
+
+mutex = threading.Lock()
+wrt = threading.Semaphore(1)
+
+
+def reader(reader_id):
+    global read_count
+
+    mutex.acquire()
+    read_count += 1
+
+    if read_count == 1:
+        wrt.acquire()
+
+    mutex.release()
+
+    print("Reader", reader_id, "is reading:", shared_data)
+    time.sleep(1)
+
+    mutex.acquire()
+    read_count -= 1
+
+    if read_count == 0:
+        wrt.release()
+
+    mutex.release()
+
+
+def writer(writer_id):
+    global shared_data
+
+    wrt.acquire()
+
+    shared_data += 1
+    print("Writer", writer_id, "is writing:", shared_data)
+    time.sleep(1)
+
+    wrt.release()
+
+
+if __name__ == "__main__":
+
+    # Take input from user
+    nr = int(input("Enter number of readers: "))
+    nw = int(input("Enter number of writers: "))
+
+    threads = []
+
+    # Create reader threads
+    for i in range(1, nr + 1):
+        t = threading.Thread(target=reader, args=(i,))
+        threads.append(t)
+
+    # Create writer threads
+    for i in range(1, nw + 1):
+        t = threading.Thread(target=writer, args=(i,))
+        threads.append(t)
+
+    # Start all threads
+    for t in threads:
+        t.start()
+
+    # Wait for all threads
+    for t in threads:
+        t.join()
+
+    print("Readers-Writers completed.")
+
+
+
+
+
+/*Automatic*/ 
+
+import threading
+import time
+
+read_count = 0
+shared_data = 0
+
+mutex = threading.Lock()
+wrt = threading.Semaphore(1)
+
+
+def reader(reader_id):
+    global read_count
+
+    # Protect the reader counter
+    mutex.acquire()
+    read_count += 1
+
+    # First reader blocks writers
+    if read_count == 1:
+        wrt.acquire()
+
+    mutex.release()
+
+    print("Reader", reader_id, "is reading:", shared_data)
+    time.sleep(1)
+
+    # Update reader counter
+    mutex.acquire()
+    read_count -= 1
+
+    # Last reader allows writers
+    if read_count == 0:
+        wrt.release()
+
+    mutex.release()
+
+
+def writer(writer_id):
+    global shared_data
+
+    wrt.acquire()
+
+    shared_data += 1
+    print("Writer", writer_id, "is writing:", shared_data)
+    time.sleep(1)
+
+    wrt.release()
+
+
+if __name__ == "__main__":
+
+    readers = []
+    writers = []
+
+    # Create three reader threads
+    for i in range(1, 4):
+        t = threading.Thread(target=reader, args=(i,))
+        readers.append(t)
+
+    # Create two writer threads
+    for i in range(1, 3):
+        t = threading.Thread(target=writer, args=(i,))
+        writers.append(t)
+
+    # Start all threads
+    for t in readers + writers:
+        t.start()
+
+    # Wait for all threads
+    for t in readers + writers:
+        t.join()
+
+    print("Readers-Writers completed.")
+
+
+
+/*input from user*/
+

@@ -1,0 +1,77 @@
+import threading
+import time
+
+BUFFER_SIZE = 5
+ITEMS = 10
+
+buffer = []
+
+# Semaphore for empty spaces
+empty = threading.Semaphore(BUFFER_SIZE)
+
+# Semaphore for filled spaces
+full = threading.Semaphore(0)
+
+# Mutex lock
+mutex = threading.Lock()
+
+
+def producer():
+    for i in range(1, ITEMS + 1):
+
+        item = i * 10
+
+        # Wait for an empty space
+        empty.acquire()
+
+        # Lock the buffer
+        mutex.acquire()
+
+        buffer.append(item)
+
+        print("Producer produced:", item)
+
+        # Unlock the buffer
+        mutex.release()
+
+        # Increase number of filled spaces
+        full.release()
+
+        time.sleep(1)
+
+
+def consumer():
+    for i in range(1, ITEMS + 1):
+
+        # Wait for an available item
+        full.acquire()
+
+        # Lock the buffer
+        mutex.acquire()
+
+        item = buffer.pop(0)
+
+        print("Consumer consumed:", item)
+
+        # Unlock the buffer
+        mutex.release()
+
+        # Increase number of empty spaces
+        empty.release()
+
+        time.sleep(2)
+
+
+# Create threads
+producer_thread = threading.Thread(target=producer)
+consumer_thread = threading.Thread(target=consumer)
+
+# Start threads
+producer_thread.start()
+consumer_thread.start()
+
+# Wait for threads to finish
+producer_thread.join()
+consumer_thread.join()
+
+print("\nProducer-Consumer execution completed.")

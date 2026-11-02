@@ -1,0 +1,125 @@
+/*File Allocation*/
+
+print("FILE ALLOCATION METHODS")
+print("1. Contiguous Allocation")
+print("2. Linked Allocation")
+print("3. Indexed Allocation")
+
+choice = int(input("Enter your choice: "))
+
+if choice == 1:
+    start = int(input("Enter starting block: "))
+    length = int(input("Enter file length: "))
+
+    print("Allocated blocks:")
+    for i in range(length):
+        print(start + i, end=" ")
+
+elif choice == 2:
+    n = int(input("Enter number of blocks: "))
+    blocks = []
+
+    for i in range(n):
+        b = int(input("Enter block number: "))
+        blocks.append(b)
+
+    print("Linked blocks:")
+    for i in range(n - 1):
+        print(blocks[i], "->", end=" ")
+    print(blocks[-1], "-> NULL")
+
+elif choice == 3:
+    index = int(input("Enter index block: "))
+    n = int(input("Enter number of file blocks: "))
+    blocks = []
+
+    for i in range(n):
+        b = int(input("Enter block number: "))
+        blocks.append(b)
+
+    print("Index block:", index)
+    print("File blocks:", blocks)
+
+else:
+    print("Invalid choice")
+
+
+/*FCFS*/
+
+requests = list(map(int, input("Enter disk requests: ").split()))
+head = int(input("Enter initial head position: "))
+
+total = 0
+current = head
+
+print("Disk movement:")
+
+for request in requests:
+    movement = abs(current - request)
+    total += movement
+    print(current, "->", request)
+    current = request
+
+print("Total head movement:", total)
+
+
+/*SCAN*/
+
+requests = list(map(int, input("Enter disk requests: ").split()))
+head = int(input("Enter initial head position: "))
+size = int(input("Enter total number of cylinders: "))
+direction = input("Enter direction (left/right): ").lower()
+
+left = []
+right = []
+
+for r in requests:
+    if r < head:
+        left.append(r)
+    else:
+        right.append(r)
+
+left.sort()
+right.sort()
+
+total = 0
+current = head
+
+print("Disk movement:")
+
+if direction == "left":
+    for r in reversed(left):
+        print(current, "->", r)
+        total += abs(current - r)
+        current = r
+
+    print(current, "-> 0")
+    total += current
+    current = 0
+
+    for r in right:
+        print(current, "->", r)
+        total += abs(current - r)
+        current = r
+
+elif direction == "right":
+    for r in right:
+        print(current, "->", r)
+        total += abs(current - r)
+        current = r
+
+    print(current, "->", size - 1)
+    total += (size - 1) - current
+    current = size - 1
+
+    for r in reversed(left):
+        print(current, "->", r)
+        total += abs(current - r)
+        current = r
+
+else:
+    print("Invalid direction")
+    exit()
+
+print("Total head movement:", total)
+

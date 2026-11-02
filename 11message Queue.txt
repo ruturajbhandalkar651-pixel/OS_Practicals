@@ -1,0 +1,27 @@
+/*message Queue*/
+
+import multiprocessing
+import time
+
+def receiver(q):
+    msg = q.get()
+    q.put("Message received")
+
+if __name__ == "__main__":
+    q = multiprocessing.Queue()
+
+    p = multiprocessing.Process(target=receiver, args=(q,))
+    p.start()
+
+    start = time.perf_counter()
+
+    q.put("Hello from Parent")
+    reply = q.get()
+
+    end = time.perf_counter()
+
+    print("Received:", reply)
+    print("Queue Communication Time:", round(end-start, 6), "seconds")
+
+    p.join()
+    q.close()

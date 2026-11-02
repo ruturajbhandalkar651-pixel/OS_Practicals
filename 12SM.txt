@@ -1,0 +1,60 @@
+/*Shared memory*/
+import multiprocessing
+from multiprocessing import shared_memory
+import time
+
+def sender(name):
+    shm = shared_memory.SharedMemory(name=name)
+    shm.buf[:5] = b"HELLO"
+    shm.close()
+
+if __name__ == "__main__":
+    shm = shared_memory.SharedMemory(create=True, size=5)
+
+    p = multiprocessing.Process(target=sender, args=(shm.name,))
+
+    start = time.perf_counter()
+
+    p.start()
+    p.join()
+
+    message = bytes(shm.buf[:5]).decode()
+
+    end = time.perf_counter()
+
+    print("Received:", message)
+    print("Shared Memory Communication Time:",
+          round(end-start, 6), "seconds")
+
+    shm.close()
+    shm.unlink()
+
+
+
+/*Message Queue*/
+
+import multiprocessing
+import time
+
+def receiver(q):
+    msg = q.get()
+    q.put("Message received")
+
+if __name__ == "__main__":
+    q = multiprocessing.Queue()
+
+    p = multiprocessing.Process(target=receiver, args=(q,))
+    p.start()
+
+    start = time.perf_counter()
+
+    q.put("Hello from Parent")
+    reply = q.get()
+
+    end = time.perf_counter()
+
+    print("Received:", reply)
+    print("Queue Communication Time:", round(end-start, 6), "seconds")
+
+    p.join()
+    q.close()

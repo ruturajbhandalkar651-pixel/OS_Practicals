@@ -1,0 +1,146 @@
+/*Bankers algorithm*/
+
+# Banker's Algorithm
+
+n = int(input("Enter number of processes: "))
+m = int(input("Enter number of resources: "))
+
+allocation = []
+maximum = []
+
+print("\nEnter Allocation Matrix:")
+for i in range(n):
+    row = list(map(int, input(f"P{i}: ").split()))
+    allocation.append(row)
+
+print("\nEnter Maximum Matrix:")
+for i in range(n):
+    row = list(map(int, input(f"P{i}: ").split()))
+    maximum.append(row)
+
+available = list(map(int, input("\nEnter Available Resources: ").split()))
+
+# Calculate Need Matrix
+need = []
+for i in range(n):
+    row = []
+    for j in range(m):
+        row.append(maximum[i][j] - allocation[i][j])
+    need.append(row)
+
+print("\nNeed Matrix:")
+for row in need:
+    print(row)
+
+# Safety Algorithm
+finish = [False] * n
+safe_sequence = []
+work = available.copy()
+
+while len(safe_sequence) < n:
+    found = False
+
+    for i in range(n):
+        if not finish[i] and all(need[i][j] <= work[j] for j in range(m)):
+            for j in range(m):
+                work[j] += allocation[i][j]
+
+            safe_sequence.append(i)
+            finish[i] = True
+            found = True
+
+    if not found:
+        break
+
+if len(safe_sequence) == n:
+    print("\nSystem is in SAFE state.")
+    print("Safe Sequence:", end=" ")
+    print(" -> ".join("P" + str(i) for i in safe_sequence))
+else:
+    print("\nSystem is in UNSAFE state.")
+
+input
+Enter number of processes: 5
+Enter number of resources: 3
+
+Enter Allocation Matrix:
+P0: 0 1 0
+P1: 2 0 0
+P2: 3 0 2
+P3: 2 1 1
+P4: 0 0 2
+
+Enter Maximum Matrix:
+P0: 7 5 3
+P1: 3 2 2
+P2: 9 0 2
+P3: 2 2 2
+P4: 4 3 3
+
+Enter Available Resources: 3 3 2
+
+
+/*deadlock*/
+
+
+# Deadlock Detection Algorithm
+
+n = int(input("Enter number of processes: "))
+m = int(input("Enter number of resources: "))
+
+allocation = []
+request = []
+
+print("\nEnter Allocation Matrix:")
+for i in range(n):
+    row = list(map(int, input(f"P{i}: ").split()))
+    allocation.append(row)
+
+print("\nEnter Request Matrix:")
+for i in range(n):
+    row = list(map(int, input(f"P{i}: ").split()))
+    request.append(row)
+
+available = list(map(int, input("\nEnter Available Resources: ").split()))
+
+work = available.copy()
+finish = [sum(allocation[i]) == 0 for i in range(n)]
+
+while True:
+    found = False
+
+    for i in range(n):
+        if not finish[i] and all(request[i][j] <= work[j] for j in range(m)):
+            for j in range(m):
+                work[j] += allocation[i][j]
+
+            finish[i] = True
+            found = True
+
+    if not found:
+        break
+
+deadlocked = [i for i in range(n) if not finish[i]]
+
+if deadlocked:
+    print("\nDeadlock detected!")
+    print("Deadlocked Processes:", deadlocked)
+else:
+    print("\nNo deadlock detected.")
+
+
+input
+Enter number of processes: 3
+Enter number of resources: 2
+
+Enter Allocation Matrix:
+P0: 1 0
+P1: 0 1
+P2: 1 0
+
+Enter Request Matrix:
+P0: 0 1
+P1: 1 0
+P2: 0 0
+
+Enter Available Resources: 0 0
