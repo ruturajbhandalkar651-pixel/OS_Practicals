@@ -1,0 +1,83 @@
+nano practical6.sh
+
+#!/bin/bash
+
+# i. Factorial using FOR loop
+
+echo "Enter a number for factorial:"
+read num
+
+if ! [[ "$num" =~ ^[0-9]+$ ]] || (( num > 20 ))
+then
+    echo "Enter a non-negative integer between 0 and 20"
+    exit 1
+fi
+
+num=$((10#$num))
+
+fact=1
+
+for ((i=1; i<=num; i++))
+do
+    fact=$((fact*i))
+done
+
+echo "Factorial using FOR loop = $fact"
+
+# Factorial using WHILE loop
+
+fact=1
+i=1
+
+while [ $i -le $num ]
+do
+    fact=$((fact*i))
+    ((i++))
+done
+
+echo "Factorial using WHILE loop = $fact"
+
+# Factorial using UNTIL loop
+
+fact=1
+i=1
+
+until [ $i -gt $num ]
+do
+    fact=$((fact*i))
+    ((i++))
+done
+
+echo "Factorial using UNTIL loop = $fact"
+
+
+# ii. Check whether number is even or odd
+
+echo "Enter a number to check even or odd:"
+read n
+
+if ! [[ "$n" =~ ^-?[0-9]+$ ]]
+then
+    echo "Please enter an integer"
+    exit 1
+fi
+
+if (( n % 2 == 0 ))
+then
+    echo "Number is Even"
+else
+    echo "Number is Odd"
+fi
+
+
+# iii. Display number using function
+
+display_number()
+{
+    echo "Entered number is: $1"
+}
+
+echo "Enter a number to display:"
+read value
+
+display_number "$value"

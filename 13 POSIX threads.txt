@@ -1,0 +1,129 @@
+#1
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
+#define TOTAL_WORK 80000000ULL
+
+typedef struct {
+    unsigned long long start;
+    unsigned long long end;
+    unsigned long long result;
+} ThreadData;
+
+// Function executed by each thread
+void* calculate(void* arg)
+{
+    ThreadData* data = (ThreadData*)arg;
+
+    unsigned long long sum = 0;
+
+    for (unsigned long long i = data->start;
+         i < data->end; i++)
+    {
+        sum += (i % 97) * (i % 89);
+    }
+
+    data->result = sum;
+
+    return NULL;
+}
+
+double cpu_time(struct rusage r)
+{
+    return r.ru_utime.tv_sec + r.ru_utime.tv_usec / 1000000.0
+         + r.ru_stime.tv_sec + r.ru_stime.tv_usec / 1000000.0;
+}
+
+int main(int argc, char* argv[])
+{
+    if (argc != 2) {
+        printf("Usage: ./pthread_demo <number_of_threads>\n");
+        return 1;
+    }
+
+    int n = atoi(argv[1]);
+
+    if (n <= 0 || n > 64) {
+        printf("Enter threads between 1 and 64\n");
+        return 1;
+    }
+
+    pthread_t threads[n];
+    ThreadData data[n];
+
+    unsigned long long base = TOTAL_WORK / n;
+    unsigned long long remainder = TOTAL_WORK % n;
+    unsigned long long start = 0;
+
+    struct timespec begin, finish;
+    struct rusage before, after;
+
+    getrusage(RUSAGE_SELF, &before);
+    clock_gettime(CLOCK_MONOTONIC, &begin);
+
+    // Create threads
+    for (int i = 0; i < n; i++) {
+
+        unsigned long long count = base + (i < remainder);
+
+        data[i].start = start;
+        data[i].end = start + count;
+        data[i].result = 0;
+
+        start = data[i].end;
+
+        if (pthread_create(&threads[i], NULL,
+                           calculate, &data[i]) != 0) {
+            printf("Thread creation failed\n");
+            return 1;
+        }
+    }
+
+    // Wait for all threads
+    unsigned long long total = 0;
+
+    for (int i = 0; i < n; i++) {
+        pthread_join(threads[i], NULL);
+        total += data[i].result;
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    getrusage(RUSAGE_SELF, &after);
+
+    double elapsed =
+        (finish.tv_sec - begin.tv_sec) +
+        (finish.tv_nsec - begin.tv_nsec) / 1000000000.0;
+
+    double cpu = cpu_time(after) - cpu_time(before);
+
+    double cpu_usage = (cpu / elapsed) * 100.0;
+
+    printf("\n===== PTHREAD PERFORMANCE =====\n");
+
+    printf("Number of Threads: %d\n", n);
+
+    printf("CPU Cores: %ld\n", sysconf(_SC_NPROCESSORS_ONLN));
+
+    printf("Execution Time: %.4f seconds\n", elapsed);
+
+    printf("CPU Utilization: %.2f%%\n", cpu_usage);
+
+    printf("Memory Consumption: %.2f MB\n",
+           after.ru_maxrss / 1024.0);
+
+    printf("Total Calculation Result: %llu\n", total);
+
+    printf("\nAll threads completed successfully.\n");
+
+    return 0;
+}
+
+#in bash
+gcc -O2 -Wall pthread_demo.c -o pthread_demo -pthread
+./pthread_demo 1
+
+

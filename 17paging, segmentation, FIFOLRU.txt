@@ -1,0 +1,163 @@
+17 paging, segmentation, FIFO and 
+LRU
+
+#1 
+
+# -------------------- 1. PAGING --------------------
+
+def paging():
+    print("\n========== PAGING ==========")
+
+    page_size = 100
+    logical_address = 250
+
+    page_number = logical_address // page_size
+    offset = logical_address % page_size
+
+    print("Page Size:", page_size)
+    print("Logical Address:", logical_address)
+    print("Page Number:", page_number)
+    print("Offset:", offset)
+
+
+# -------------------- 2. SEGMENTATION --------------------
+
+def segmentation():
+    print("\n========== SEGMENTATION ==========")
+
+    # Segment number: (base address, segment limit)
+    segments = {
+        0: (1000, 400),  # Code
+        1: (2000, 300),  # Data
+        2: (3000, 200)   # Stack
+    }
+
+    segment_number = 1
+    offset = 150
+
+    if segment_number in segments:
+        base, limit = segments[segment_number]
+
+        print("Segment Number:", segment_number)
+        print("Base Address:", base)
+        print("Segment Limit:", limit)
+        print("Offset:", offset)
+
+        if 0 <= offset < limit:
+            physical_address = base + offset
+            print("Physical Address:", physical_address)
+        else:
+            print("Error: Offset exceeds segment limit.")
+    else:
+        print("Error: Invalid segment number.")
+
+
+# -------------------- 3. FIFO PAGE REPLACEMENT --------------------
+
+def fifo(reference_string, capacity):
+    print("\n========== FIFO PAGE REPLACEMENT ==========")
+
+    frames = []
+    page_faults = 0
+    page_hits = 0
+
+    for page in reference_string:
+        if page in frames:
+            page_hits += 1
+            print("Page:", page, "-> HIT  ", frames)
+        else:
+            page_faults += 1
+
+            if len(frames) < capacity:
+                frames.append(page)
+            else:
+                frames.pop(0)
+                frames.append(page)
+
+            print("Page:", page, "-> FAULT", frames)
+
+    print("Total Page Faults:", page_faults)
+    print("Total Page Hits:", page_hits)
+
+    fault_rate = (page_faults / len(reference_string)) * 100
+    print("Page Fault Rate: {:.2f}%".format(fault_rate))
+
+    return page_faults, page_hits
+
+
+# -------------------- 4. LRU PAGE REPLACEMENT --------------------
+
+def lru(reference_string, capacity):
+    print("\n========== LRU PAGE REPLACEMENT ==========")
+
+    frames = []
+    page_faults = 0
+    page_hits = 0
+
+    for page in reference_string:
+        if page in frames:
+            page_hits += 1
+
+            # Move the recently used page to the end
+            frames.remove(page)
+            frames.append(page)
+
+            print("Page:", page, "-> HIT  ", frames)
+
+        else:
+            page_faults += 1
+
+            if len(frames) < capacity:
+                frames.append(page)
+            else:
+                # Remove the least recently used page
+                frames.pop(0)
+                frames.append(page)
+
+            print("Page:", page, "-> FAULT", frames)
+
+    print("Total Page Faults:", page_faults)
+    print("Total Page Hits:", page_hits)
+
+    fault_rate = (page_faults / len(reference_string)) * 100
+    print("Page Fault Rate: {:.2f}%".format(fault_rate))
+
+    return page_faults, page_hits
+
+
+# -------------------- 5. MAIN PROGRAM --------------------
+
+def main():
+    paging()
+    segmentation()
+
+    reference_string = [1, 2, 3, 1, 4, 5, 2, 1, 2, 3, 4, 5]
+    capacity = 3
+
+    print("\nReference String:", reference_string)
+    print("Number of Frames:", capacity)
+
+    fifo_faults, fifo_hits = fifo(reference_string, capacity)
+    lru_faults, lru_hits = lru(reference_string, capacity)
+
+    print("\n========== COMPARISON ==========")
+    print("{:<15} {:<15} {:<15}".format(
+        "Algorithm", "Page Faults", "Page Hits"
+    ))
+    print("{:<15} {:<15} {:<15}".format(
+        "FIFO", fifo_faults, fifo_hits
+    ))
+    print("{:<15} {:<15} {:<15}".format(
+        "LRU", lru_faults, lru_hits
+    ))
+
+    if fifo_faults < lru_faults:
+        print("\nFIFO produced fewer page faults for this reference string.")
+    elif lru_faults < fifo_faults:
+        print("\nLRU produced fewer page faults for this reference string.")
+    else:
+        print("\nBoth algorithms produced the same number of page faults.")
+
+
+if __name__ == "__main__":
+    main()

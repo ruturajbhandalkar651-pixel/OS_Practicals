@@ -1,0 +1,61 @@
+# OSL PRACTICAL 1
+# Basic File and Directory Operations in Linux
+
+# 1. Display current working directory
+pwd
+
+# Display all files, including hidden files
+ls -la
+
+# 2. Create main directory and three subdirectories
+cd ~/OSL_Practicals
+mkdir -p OS_Lab
+cd OS_Lab
+
+mkdir -p Programs Documents Backup
+
+# Display directories
+ls
+
+# 3. Create text files
+touch file1.txt file2.txt file3.txt
+
+# Write content into files
+echo "This is the first file." > file1.txt
+echo "This is the second file." > file2.txt
+echo "This is the third file." > file3.txt
+
+# Display file contents
+cat file1.txt
+cat file2.txt
+cat file3.txt
+
+# 4. Copy a file
+cp file1.txt file1_copy.txt
+
+# Rename a file
+mv file2.txt renamed_file.txt
+
+# Move a file into Documents
+mv file3.txt Documents/
+
+# Delete a copied file
+rm file1_copy.txt
+
+# Display remaining files
+ls
+
+# Display Documents directory contents
+ls Documents
+
+# 5. Search for a file
+find . -name "renamed_file.txt"
+
+# Display detailed file information
+stat renamed_file.txt
+
+# Display file size
+du -h renamed_file.txt
+
+# Display complete directory structure
+ls -lR

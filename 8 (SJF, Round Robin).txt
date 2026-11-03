@@ -1,0 +1,221 @@
+8 (SJF, Round Robin)
+#1
+sudo apt update
+sudo apt install python3-psutil -y
+
+python3 -c "import psutil; print('psutil installed successfully')"
+import os
+
+print("Parent Process Started")
+print("Parent PID:", os.getpid(), flush=True)
+
+# Create child process
+pid = os.fork()
+
+if pid == 0:
+
+    # Child process
+    print("\nChild Process Created")
+    print("Child PID:", os.getpid())
+    print("Parent PID:", os.getppid())
+
+    print("Executing ls command", flush=True)
+
+    # Execute Linux command
+    os.execvp("ls", ["ls", "-l"])
+
+else:
+
+    # Parent process
+    print("\nParent is waiting for child")
+
+    # Wait for child process
+    child_pid, status = os.waitpid(pid, 0)
+
+    print("\nChild Process Completed")
+    print("Child PID:", child_pid)
+    print("Exit Status:", os.waitstatus_to_exitcode(status))
+
+#2 sjf
+# SJF CPU Scheduling
+
+n = int(input("Enter number of processes: "))
+
+processes = []
+
+# Input burst time
+for i in range(n):
+    bt = int(input(f"Enter burst time for P{i+1}: "))
+    processes.append((f"P{i+1}", bt))
+
+# Sort by burst time
+processes.sort(key=lambda x: x[1])
+
+time = 0
+total_wt = 0
+total_tat = 0
+
+print("\nProcess\tBT\tWT\tTAT\tCT")
+
+for name, bt in processes:
+
+    wt = time
+    time += bt
+    ct = time
+    tat = ct
+
+    total_wt += wt
+    total_tat += tat
+
+    print(f"{name}\t{bt}\t{wt}\t{tat}\t{ct}")
+
+print("\nAverage Waiting Time:", total_wt/n)
+print("Average Turnaround Time:", total_tat/n)
+
+#3 robin2
+# Round Robin CPU Scheduling
+
+n = int(input("Enter number of processes: "))
+
+bt = []
+
+# Input burst time
+for i in range(n):
+    t = int(input(f"Enter burst time for P{i+1}: "))
+    bt.append(t)
+
+# Input time quantum
+q = int(input("Enter time quantum: "))
+
+if n <= 0 or q <= 0 or any(t <= 0 for t in bt):
+    print("Enter valid positive values.")
+else:
+
+    remaining = bt.copy()
+    ct = [0] * n
+    time = 0
+    gantt = []
+
+    # Execute processes using Round Robin
+    while any(remaining):
+
+        for i in range(n):
+
+            if remaining[i] > 0:
+
+                run = min(q, remaining[i])
+
+                remaining[i] -= run
+                time += run
+
+                gantt.append((f"P{i+1}", time))
+
+                if remaining[i] == 0:
+                    ct[i] = time
+
+    total_wt = 0
+    total_tat = 0
+
+    print("\nRound Robin Results")
+    print("\nProcess\tBT\tWT\tTAT\tCT")
+
+    for i in range(n):
+
+        tat = ct[i]
+        wt = tat - bt[i]
+
+        total_wt += wt
+        total_tat += tat
+
+        print(f"P{i+1}\t{bt[i]}\t{wt}\t{tat}\t{ct[i]}")
+
+    print("\nAverage Waiting Time:", total_wt/n)
+    print("Average Turnaround Time:", total_tat/n)
+
+    # Display Gantt Chart
+    print("\nGantt Chart:")
+    print("0", end="")
+
+    for name, end_time in gantt:
+        print(f" | {name} | {end_time}", end="")
+
+    print()
+#4 memory utilization
+import psutil
+
+print("===== MEMORY UTILIZATION =====")
+
+# Get memory information
+memory = psutil.virtual_memory()
+
+print("Total Memory:",
+      round(memory.total / (1024**3), 2), "GB")
+
+print("Used Memory:",
+      round(memory.used / (1024**3), 2), "GB")
+
+print("Available Memory:",
+      round(memory.available / (1024**3), 2), "GB")
+
+print("Memory Usage:", memory.percent, "%")
+
+# Display swap memory
+swap = psutil.swap_memory()
+
+print("\nSwap Memory:")
+print("Total Swap:",
+      round(swap.total / (1024**3), 2), "GB")
+
+print("Used Swap:",
+      round(swap.used / (1024**3), 2), "GB")
+
+print("Swap Usage:", swap.percent, "%")
+
+#5 overall performance
+
+import psutil
+import os
+
+print("===== OVERALL SYSTEM PERFORMANCE =====")
+
+# CPU Performance
+cpu = psutil.cpu_percent(interval=1)
+
+print("\nCPU Usage:", cpu, "%")
+
+print("CPU Cores:", psutil.cpu_count())
+
+# Memory Performance
+memory = psutil.virtual_memory()
+
+print("\nMemory Usage:", memory.percent, "%")
+
+print("Available Memory:",
+      round(memory.available / (1024**3), 2), "GB")
+
+# Running Processes
+processes = psutil.pids()
+
+print("\nRunning Processes:", len(processes))
+
+# Disk Performance
+disk = psutil.disk_usage("/")
+
+print("\nDisk Usage")
+
+print("Total Disk:",
+      round(disk.total / (1024**3), 2), "GB")
+
+print("Used Disk:",
+      round(disk.used / (1024**3), 2), "GB")
+
+print("Free Disk:",
+      round(disk.free / (1024**3), 2), "GB")
+
+# Current Python Program Memory
+process = psutil.Process(os.getpid())
+
+print("\nPython Program Memory:",
+      round(process.memory_info().rss / (1024**2), 2), "MB")
+
+print("\nSystem Performance Analysis Completed")

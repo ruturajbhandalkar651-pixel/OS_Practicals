@@ -1,0 +1,65 @@
+nano for .sh
+bash for .sh
+
+
+
+#!/bin/bash
+
+# i. Multiplication table using loops
+
+echo "Enter a number:"
+read num
+
+echo "Multiplication Table using FOR loop:"
+for ((i=1; i<=10; i++))
+do
+    echo "$num x $i = $((num*i))"
+done
+
+echo "Multiplication Table using WHILE loop:"
+i=1
+while [ $i -le 10 ]
+do
+    echo "$num x $i = $((num*i))"
+    ((i++))
+done
+
+echo "Multiplication Table using UNTIL loop:"
+i=1
+until [ $i -gt 10 ]
+do
+    echo "$num x $i = $((num*i))"
+    ((i++))
+done
+
+# ii. Check positive, negative or zero
+
+echo "Enter a number to check:"
+read n
+
+if [ $n -gt 0 ]
+then
+    echo "Number is Positive"
+elif [ $n -lt 0 ]
+then
+    echo "Number is Negative"
+else
+    echo "Number is Zero"
+fi
+
+# iii. Check whether a file exists
+
+echo "Enter filename:"
+read filename
+
+if [ -f "$filename" ]
+then
+    echo "File exists"
+    echo "File Size:"
+    stat -c "%s bytes" "$filename"
+
+    echo "File Information:"
+    stat "$filename"
+else
+    echo "File does not exist"
+fi

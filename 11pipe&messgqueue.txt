@@ -1,0 +1,121 @@
+11:pipe&messgqueue
+  #1 pipe
+import multiprocessing as mp
+import time
+
+
+# 1. IPC USING PIPE
+
+def pipe_child(connection, count):
+    for i in range(count):
+        message = connection.recv()
+        print("Child received:", message)
+
+        connection.send("Message received successfully")
+
+    connection.close()
+
+
+def pipe_demo():
+    print("\n--- IPC USING PIPE ---")
+
+    parent_conn, child_conn = mp.Pipe()
+
+    messages = [
+        "Hello from Parent",
+        "Welcome to IPC Practical",
+        "Pipe communication example"
+    ]
+
+    process = mp.Process(
+        target=pipe_child,
+        args=(child_conn, len(messages))
+    )
+
+    process.start()
+    child_conn.close()
+
+    start = time.perf_counter()
+
+    for message in messages:
+        parent_conn.send(message)
+        print("Parent sent:", message)
+
+    for message in messages:
+        print("Parent received:", parent_conn.recv())
+
+    end = time.perf_counter()
+
+    total_bytes = sum(len(m.encode()) for m in messages)
+
+    print("Total data transferred:", total_bytes, "bytes")
+    print("Communication time:", round(end - start, 6), "seconds")
+
+    parent_conn.close()
+    process.join()
+
+
+# 2. IPC USING MESSAGE QUEUE
+
+def queue_child(request_queue, response_queue):
+    while True:
+        message = request_queue.get()
+
+        if message is None:
+            break
+
+        print("Child received:", message)
+
+        response_queue.put("Message received successfully")
+
+
+def queue_demo():
+    print("\n--- IPC USING MESSAGE QUEUE ---")
+
+    request_queue = mp.Queue()
+    response_queue = mp.Queue()
+
+    messages = [
+        "Hello from Parent",
+        "Welcome to IPC Practical",
+        "Message Queue communication example"
+    ]
+
+    process = mp.Process(
+        target=queue_child,
+        args=(request_queue, response_queue)
+    )
+
+    process.start()
+
+    start = time.perf_counter()
+
+    for message in messages:
+        request_queue.put(message)
+        print("Parent sent:", message)
+
+    request_queue.put(None)
+
+    for message in messages:
+        print("Parent received:", response_queue.get())
+
+    end = time.perf_counter()
+
+    total_bytes = sum(len(m.encode()) for m in messages)
+
+    print("Total data transferred:", total_bytes, "bytes")
+    print("Communication time:", round(end - start, 6), "seconds")
+
+    process.join()
+
+    request_queue.close()
+    response_queue.close()
+
+
+# MAIN PROGRAM
+
+if __name__ == "__main__":
+    mp.freeze_support()
+
+    pipe_demo()
+    queue_demo()

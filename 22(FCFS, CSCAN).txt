@@ -1,0 +1,143 @@
+import time
+
+# FILE ALLOCATION SIMULATION
+print("FILE ALLOCATION SIMULATION")
+
+total_blocks = 20
+
+# 1. Contiguous Allocation
+contiguous = [0, 1, 2, 3]
+
+print("\nContiguous Allocation:")
+print("Allocated Blocks:", contiguous)
+print("Storage Utilization:",
+      round(len(contiguous) / total_blocks * 100, 2), "%")
+
+
+# 2. Linked Allocation
+linked = [2, 5, 8, 11]
+
+print("\nLinked Allocation:")
+for i in range(len(linked) - 1):
+    print(linked[i], "->", linked[i + 1])
+print(linked[-1], "-> None")
+
+print("Storage Utilization:",
+      round(len(linked) / total_blocks * 100, 2), "%")
+
+
+# 3. Indexed Allocation
+index_block = 15
+data_blocks = [3, 6, 9, 12]
+
+print("\nIndexed Allocation:")
+print("Index Block:", index_block)
+print("Data Blocks:", data_blocks)
+
+used_blocks = len(data_blocks) + 1
+
+print("Storage Utilization:",
+      round(used_blocks / total_blocks * 100, 2), "%")
+
+
+# DISK SCHEDULING
+requests = [98, 183, 37, 122, 14, 124, 65, 67]
+head = 53
+disk_size = 200
+seek_time = 0.1
+
+
+# FCFS ALGORITHM
+def fcfs(requests, head):
+    movement = 0
+    current = head
+
+    for request in requests:
+        movement += abs(current - request)
+        current = request
+
+    return movement
+
+
+# C-SCAN ALGORITHM
+def cscan(requests, head, disk_size):
+    left = sorted([r for r in requests if r < head])
+    right = sorted([r for r in requests if r >= head])
+
+    movement = 0
+    current = head
+    order = []
+
+    # Move right and service requests
+    for request in right:
+        movement += abs(current - request)
+        current = request
+        order.append(request)
+
+    # Move to the end of the disk
+    movement += abs((disk_size - 1) - current)
+    current = disk_size - 1
+
+    # Circular jump to the beginning
+    movement += current
+    current = 0
+
+    # Service remaining requests in ascending order
+    for request in left:
+        movement += abs(current - request)
+        current = request
+        order.append(request)
+
+    return movement, order
+
+
+# PERFORMANCE ANALYSIS
+print("\nDISK SCHEDULING PERFORMANCE")
+
+start = time.perf_counter()
+fcfs_movement = fcfs(requests, head)
+fcfs_execution = time.perf_counter() - start
+
+start = time.perf_counter()
+cscan_movement, cscan_order = cscan(
+    requests, head, disk_size
+)
+cscan_execution = time.perf_counter() - start
+
+total_requests = len(requests)
+
+fcfs_total_time = fcfs_movement * seek_time
+cscan_total_time = cscan_movement * seek_time
+
+fcfs_average = fcfs_total_time / total_requests
+cscan_average = cscan_total_time / total_requests
+
+fcfs_throughput = total_requests / (fcfs_total_time / 1000)
+cscan_throughput = total_requests / (cscan_total_time / 1000)
+
+print("\nFCFS RESULTS")
+print("Total Head Movement:", fcfs_movement)
+print("Average Access Time:", round(fcfs_average, 2), "ms")
+print("Throughput:", round(fcfs_throughput, 2), "requests/sec")
+print("Execution Time:", round(fcfs_execution, 8), "seconds")
+
+print("\nC-SCAN RESULTS")
+print("Service Order:", cscan_order)
+print("Total Head Movement:", cscan_movement)
+print("Average Access Time:", round(cscan_average, 2), "ms")
+print("Throughput:", round(cscan_throughput, 2), "requests/sec")
+print("Execution Time:", round(cscan_execution, 8), "seconds")
+
+print("\nFINAL COMPARISON")
+
+if cscan_movement < fcfs_movement:
+    print("C-SCAN performs better than FCFS.")
+else:
+    print("FCFS performs better than C-SCAN.")
+
+print("Total Disk Requests:", total_requests)
+print("Disk Size:", disk_size)
+
+press crtl s
+
+bash python task22.py

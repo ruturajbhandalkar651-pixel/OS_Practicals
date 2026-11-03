@@ -1,0 +1,221 @@
+7(fcfs,sjf)
+
+# 1 create and manage process
+code=
+import os
+
+def process_management():
+
+    print("Parent Process Started")
+    print("Parent PID:", os.getpid(), flush=True)
+
+    pid = os.fork()
+
+    if pid == 0:
+
+        print("\nChild Process Created")
+        print("Child PID:", os.getpid())
+        print("Parent PID:", os.getppid())
+
+        print("Executing ls command using execvp()", flush=True)
+
+        os.execvp("ls", ["ls", "-l"])
+
+    else:
+
+        print("\nParent is waiting for child process", flush=True)
+
+        child_pid, status = os.waitpid(pid, 0)
+
+        print("\nChild Process Completed")
+        print("Child PID:", child_pid)
+
+        if os.WIFEXITED(status):
+            print("Exit Status:", os.WEXITSTATUS(status))
+        else:
+            print("Child process terminated abnormally")
+
+
+# Call the function
+if __name__ == "__main__":
+    process_management()
+
+#2 fcfs scheduling
+code=
+ # FCFS CPU Scheduling Algorithm
+
+n = int(input("Enter number of processes: "))
+
+if n <= 0:
+    print("Number of processes must be positive.")
+    raise SystemExit
+
+processes = []
+burst_time = []
+
+# Accept burst time
+for i in range(n):
+    bt = int(input(f"Enter burst time for P{i+1}: "))
+
+    if bt <= 0:
+        print("Burst time must be positive.")
+        raise SystemExit
+
+    processes.append(f"P{i+1}")
+    burst_time.append(bt)
+
+waiting_time = [0] * n
+turnaround_time = [0] * n
+completion_time = [0] * n
+
+# Calculate waiting time
+for i in range(1, n):
+    waiting_time[i] = waiting_time[i-1] + burst_time[i-1]
+
+# Calculate turnaround and completion time
+for i in range(n):
+    completion_time[i] = waiting_time[i] + burst_time[i]
+    turnaround_time[i] = completion_time[i]
+
+# Calculate averages
+avg_wt = sum(waiting_time) / n
+avg_tat = sum(turnaround_time) / n
+
+# Display results
+print("\nFCFS Scheduling Results")
+
+print("\nProcess\tBT\tWT\tTAT\tCT")
+
+for i in range(n):
+    print(
+        processes[i], "\t",
+        burst_time[i], "\t",
+        waiting_time[i], "\t",
+        turnaround_time[i], "\t",
+        completion_time[i]
+    )
+
+print("\nAverage Waiting Time:", round(avg_wt, 2))
+print("Average Turnaround Time:", round(avg_tat, 2))
+
+# Display Gantt chart
+print("\nGantt Chart:")
+
+time = 0
+print("0", end="")
+
+for i in range(n):
+    time += burst_time[i]
+    print(f" | {processes[i]} | {time}", end="")
+
+print()
+
+#3 sjf
+code=
+ # FCFS CPU Scheduling Algorithm
+
+n = int(input("Enter number of processes: "))
+
+if n <= 0:
+    print("Number of processes must be positive.")
+    raise SystemExit
+
+processes = []
+burst_time = []
+
+# Accept burst time
+for i in range(n):
+    bt = int(input(f"Enter burst time for P{i+1}: "))
+
+    if bt <= 0:
+        print("Burst time must be positive.")
+        raise SystemExit
+
+    processes.append(f"P{i+1}")
+    burst_time.append(bt)
+
+waiting_time = [0] * n
+turnaround_time = [0] * n
+completion_time = [0] * n
+
+# Calculate waiting time
+for i in range(1, n):
+    waiting_time[i] = waiting_time[i-1] + burst_time[i-1]
+
+# Calculate turnaround and completion time
+for i in range(n):
+    completion_time[i] = waiting_time[i] + burst_time[i]
+    turnaround_time[i] = completion_time[i]
+
+# Calculate averages
+avg_wt = sum(waiting_time) / n
+avg_tat = sum(turnaround_time) / n
+
+# Display results
+print("\nFCFS Scheduling Results")
+
+print("\nProcess\tBT\tWT\tTAT\tCT")
+
+for i in range(n):
+    print(
+        processes[i], "\t",
+        burst_time[i], "\t",
+        waiting_time[i], "\t",
+        turnaround_time[i], "\t",
+        completion_time[i]
+    )
+
+print("\nAverage Waiting Time:", round(avg_wt, 2))
+print("Average Turnaround Time:", round(avg_tat, 2))
+
+# Display Gantt chart
+print("\nGantt Chart:")
+
+time = 0
+print("0", end="")
+
+for i in range(n):
+    time += burst_time[i]
+    print(f" | {processes[i]} | {time}", end="")
+
+print()
+ 
+
+#4 cpu monitor and usage
+
+code =
+import psutil
+
+# Display CPU usage
+cpu_usage = psutil.cpu_percent(interval=1)
+
+print("SYSTEM RESOURCE MONITORING")
+
+print("\nCPU Usage:", cpu_usage, "%")
+
+# Display memory information
+memory = psutil.virtual_memory()
+
+print("\nMemory Information")
+
+print("Total Memory:", round(memory.total / (1024**3), 2), "GB")
+
+print("Used Memory:", round(memory.used / (1024**3), 2), "GB")
+
+print("Available Memory:", round(memory.available / (1024**3), 2), "GB")
+
+print("Memory Usage:", memory.percent, "%")
+
+# Display number of running processes
+print("\nRunning Processes:", len(psutil.pids()))
+
+# Display disk usage
+disk = psutil.disk_usage("/")
+
+print("\nDisk Usage")
+
+print("Total Disk:", round(disk.total / (1024**3), 2), "GB")
+
+print("Used Disk:", round(disk.used / (1024**3), 2), "GB")
+
+print("Free Disk:", round(disk.free / (1024**3), 2), "GB")

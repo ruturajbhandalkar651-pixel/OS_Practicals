@@ -1,0 +1,56 @@
+# OSL PRACTICAL 2
+# File Permissions, Ownership, Process Monitoring and System Resources
+
+# 1. Create folder and files
+cd ~/OSL_Practicals
+mkdir -p Practical2
+cd Practical2
+
+touch file1.txt file2.txt file3.txt
+
+# 2. Set numeric permissions
+chmod 644 file1.txt
+chmod 755 file2.txt
+chmod 700 file3.txt
+ls -l
+
+# 3. Modify permissions using symbolic mode
+chmod u+x file1.txt
+chmod g-w file2.txt
+chmod a+r file3.txt
+ls -l
+
+# 4. Identify current user and group
+whoami
+id
+ls -l
+
+# 5. Change file ownership
+sudo chown root:root file1.txt
+ls -l file1.txt
+
+# Restore ownership
+sudo chown aryan:aryan file1.txt
+ls -l file1.txt
+
+# 6. Display running processes
+ps
+ps aux
+pgrep -a bash
+echo $$
+
+# 7. Monitor processes in real time
+top
+# Press q to exit top
+
+# 8. Display CPU information
+lscpu
+
+# 9. Display memory usage
+free -h
+
+# 10. Display disk-space information
+df -h
+
+# 11. Display Practical 2 folder size
+du -sh ~/OSL_Practicals/Practical2

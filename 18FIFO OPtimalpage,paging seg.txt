@@ -1,0 +1,130 @@
+18
+#1
+import time
+
+# PAGING SIMULATION
+print("PAGING SIMULATION")
+
+page_size = 1000
+logical_address = 2500
+
+page_number = logical_address // page_size
+offset = logical_address % page_size
+
+frame_number = 3
+physical_address = frame_number * page_size + offset
+
+print("Logical Address:", logical_address)
+print("Page Number:", page_number)
+print("Offset:", offset)
+print("Frame Number:", frame_number)
+print("Physical Address:", physical_address)
+
+
+# SEGMENTATION SIMULATION
+print("\nSEGMENTATION SIMULATION")
+
+segments = [
+    [1000, 500],
+    [2000, 300],
+    [3000, 700]
+]
+
+segment_number = 1
+offset = 200
+
+base, limit = segments[segment_number]
+
+if offset < limit:
+    print("Valid Segment")
+    print("Base Address:", base)
+    print("Limit:", limit)
+    print("Physical Address:", base + offset)
+else:
+    print("Invalid Segment")
+
+
+# VIRTUAL MEMORY MANAGEMENT
+pages = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2]
+capacity = 3
+
+
+# FIFO ALGORITHM
+def fifo(pages, capacity):
+    frames = []
+    faults = 0
+
+    for page in pages:
+        if page not in frames:
+            faults += 1
+
+            if len(frames) == capacity:
+                frames.pop(0)
+
+            frames.append(page)
+
+    return faults
+
+
+# OPTIMAL ALGORITHM
+def optimal(pages, capacity):
+    frames = []
+    faults = 0
+
+    for i in range(len(pages)):
+        page = pages[i]
+
+        if page not in frames:
+            faults += 1
+
+            if len(frames) == capacity:
+                future = pages[i + 1:]
+                positions = []
+
+                for frame in frames:
+                    if frame in future:
+                        positions.append(future.index(frame))
+                    else:
+                        positions.append(float('inf'))
+
+                replace_index = positions.index(max(positions))
+                frames.pop(replace_index)
+
+            frames.append(page)
+
+    return faults
+
+
+# PERFORMANCE ANALYSIS
+print("\nVIRTUAL MEMORY MANAGEMENT")
+
+total = len(pages)
+
+print("Reference String:", pages)
+print("Number of Frames:", capacity)
+
+start = time.perf_counter()
+fifo_faults = fifo(pages, capacity)
+fifo_time = time.perf_counter() - start
+
+start = time.perf_counter()
+optimal_faults = optimal(pages, capacity)
+optimal_time = time.perf_counter() - start
+
+print("\nFIFO RESULTS")
+print("Page Faults:", fifo_faults)
+print("Page Hits:", total - fifo_faults)
+print("Fault Rate:", round(fifo_faults / total * 100, 2), "%")
+print("Execution Time:", round(fifo_time, 8), "seconds")
+
+print("\nOPTIMAL RESULTS")
+print("Page Faults:", optimal_faults)
+print("Page Hits:", total - optimal_faults)
+print("Fault Rate:", round(optimal_faults / total * 100, 2), "%")
+print("Execution Time:", round(optimal_time, 8), "seconds")
+
+
+press ctrl s
+
+enter in bash 
+python3 memory_management.py

@@ -1,0 +1,100 @@
+10 pipes&shared memory
+#1
+
+import os
+from multiprocessing import Process
+from multiprocessing.shared_memory import SharedMemory
+
+
+# 1. IPC using PIPE
+
+def pipe_demo():
+    print("\n--- IPC USING PIPE ---", flush=True)
+
+    read_fd, write_fd = os.pipe()
+
+    pid = os.fork()
+
+    if pid == 0:
+        # Child process
+        os.close(write_fd)
+
+        data = os.read(read_fd, 1024)
+
+        print("Child received:", data.decode(), flush=True)
+
+        os.close(read_fd)
+        os._exit(0)
+
+    else:
+        # Parent process
+        os.close(read_fd)
+
+        message = b"Hello from Parent Process"
+
+        os.write(write_fd, message)
+
+        print("Parent sent:", message.decode())
+
+        os.close(write_fd)
+        os.waitpid(pid, 0)
+
+
+# 2. IPC using SHARED MEMORY
+
+def shared_memory_child(name, size):
+    shm = SharedMemory(name=name)
+
+    data = bytes(shm.buf[:size])
+    message = data.split(b'\0', 1)[0].decode()
+
+    print("Child received:", message)
+
+    # Child sends a reply through shared memory
+    reply = b"Reply from Child"
+
+    shm.buf[:size] = bytes(size)
+    shm.buf[:len(reply)] = reply
+
+    shm.close()
+
+
+def shared_memory_demo():
+    print("\n--- IPC USING SHARED MEMORY ---")
+
+    size = 100
+    shm = SharedMemory(create=True, size=size)
+
+    try:
+        message = b"Hello from Parent using Shared Memory"
+
+        shm.buf[:size] = bytes(size)
+        shm.buf[:len(message)] = message
+
+        process = Process(
+            target=shared_memory_child,
+            args=(shm.name, size)
+        )
+
+        process.start()
+        process.join()
+
+        reply = bytes(shm.buf[:size]).split(b'\0', 1)[0]
+        print("Parent received:", reply.decode())
+
+        print("Shared memory capacity:", shm.size, "bytes")
+        print("Message size:", len(message), "bytes")
+
+        utilization = (len(message) / shm.size) * 100
+        print("Memory utilization:", round(utilization, 2), "%")
+
+    finally:
+        shm.close()
+        shm.unlink()
+
+
+# Main program
+
+if __name__ == "__main__":
+    pipe_demo()
+    shared_memory_demo()

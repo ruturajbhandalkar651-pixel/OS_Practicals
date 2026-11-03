@@ -1,0 +1,40 @@
+# OSL PRACTICAL 3
+# Student Records Management Using Linux Commands
+
+cd ~/OSL_Practicals
+
+# 1. Create directories
+mkdir -p Student_Records
+cd Student_Records
+mkdir -p FY SY TE BE Backup
+
+# 2. Create student record files
+echo -e "Name: Rahul\nRoll No: 101\nName: Priya\nRoll No: 102" > FY/FY_Students.txt
+
+echo -e "Name: Amit\nRoll No: 201\nName: Sneha\nRoll No: 202" > SY/SY_Students.txt
+
+echo -e "Name: Karan\nRoll No: 301\nName: Neha\nRoll No: 302" > TE/TE_Students.txt
+
+echo -e "Name: Akash\nRoll No: 401\nName: Riya\nRoll No: 402" > BE/BE_Students.txt
+
+# Display student records
+cat FY/FY_Students.txt
+cat SY/SY_Students.txt
+cat TE/TE_Students.txt
+cat BE/BE_Students.txt
+
+# 3. Copy selected files
+cp FY/FY_Students.txt Backup/
+cp SY/SY_Students.txt Backup/
+
+# 4. Rename and delete files
+mv Backup/FY_Students.txt Backup/FY_Students_Copy.txt
+
+touch TE/Temporary.txt
+rm TE/Temporary.txt
+
+# 5. Display complete directory structure
+ls -R
+
+# Optional tree view
+tree

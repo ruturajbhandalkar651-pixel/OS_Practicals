@@ -1,0 +1,62 @@
+# OSL PRACTICAL 4
+# File Permissions and Ownership in Linux
+
+# 1. Create project directory and files
+cd ~/OSL_Practicals
+mkdir -p AIML_Project
+cd AIML_Project
+
+touch students.txt faculty.txt administrators.txt
+
+# Add content
+echo "Student records: Rahul, Priya, Amit" > students.txt
+echo "Faculty records: Prof. Sharma, Prof. Patil" > faculty.txt
+echo "Administrator records: Admin1, Admin2" > administrators.txt
+
+# 2. Assign different numeric permissions
+chmod 644 students.txt
+chmod 640 faculty.txt
+chmod 600 administrators.txt
+
+# 3. Display ownership and permissions
+whoami
+id
+ls -l
+stat students.txt
+stat faculty.txt
+stat administrators.txt
+
+# 4. Change permissions using symbolic notation
+chmod u+x students.txt
+chmod g+w faculty.txt
+chmod o+r administrators.txt
+ls -l
+
+# Change permissions using numeric notation
+chmod 755 students.txt
+chmod 644 faculty.txt
+chmod 700 administrators.txt
+ls -l
+
+# 5A. Demonstrate read permission
+cat students.txt
+chmod 000 students.txt
+cat students.txt
+chmod 644 students.txt
+
+# 5B. Demonstrate write permission
+echo "New student: Karan" >> students.txt
+cat students.txt
+chmod 444 students.txt
+echo "New student: Neha" >> students.txt
+chmod 644 students.txt
+
+# 5C. Demonstrate execute permission
+echo 'echo "AIML Project Executed Successfully"' > test.sh
+chmod 644 test.sh
+./test.sh
+chmod 755 test.sh
+./test.sh
+
+# Final permission details
+ls -l

@@ -1,0 +1,85 @@
+12sharedmemory&messgqueue
+
+#1 shared memory
+from multiprocessing import Process, shared_memory
+
+
+# Child process reads shared memory
+def read_data(name, size):
+
+    shm = shared_memory.SharedMemory(name=name)
+
+    message = bytes(shm.buf[:size]).decode()
+
+    print("Child received:", message)
+
+    shm.close()
+
+
+if __name__ == "__main__":
+
+    # Create shared memory
+    message = b"Hello using Shared Memory"
+
+    shm = shared_memory.SharedMemory(
+        create=True, size=100
+    )
+
+    # Parent writes data
+    shm.buf[:len(message)] = message
+
+    print("Parent wrote:", message.decode())
+
+    # Create child process
+    p = Process(
+        target=read_data,
+        args=(shm.name, len(message))
+    )
+
+    p.start()
+    p.join()
+
+    # Close and remove shared memory
+    shm.close()
+    shm.unlink()
+
+    print("Shared Memory Communication Completed")
+
+#2 messg queue
+from multiprocessing import Process, Queue
+
+
+# Child process receives message
+def receiver(q):
+
+    message = q.get()
+
+    print("Child received:", message)
+
+
+if __name__ == "__main__":
+
+    # Create message queue
+    q = Queue()
+
+    # Create child process
+    p = Process(
+        target=receiver,
+        args=(q,)
+    )
+
+    p.start()
+
+    # Parent sends message
+    message = "Hello using Message Queue"
+
+    print("Parent sent:", message)
+
+    q.put(message)
+
+    # Wait for child
+    p.join()
+
+    q.close()
+
+    print("Message Queue Communication Completed")

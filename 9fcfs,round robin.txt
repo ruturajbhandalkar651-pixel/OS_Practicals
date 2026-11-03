@@ -1,0 +1,207 @@
+9fcfs,round robin
+#1create and manage processes
+import os
+
+print("Parent Process Started")
+print("Parent PID:", os.getpid(), flush=True)
+
+# Create child process
+pid = os.fork()
+
+if pid == 0:
+
+    # Child process
+    print("\nChild Process Created")
+    print("Child PID:", os.getpid())
+    print("Parent PID:", os.getppid())
+
+    print("Executing ls command", flush=True)
+
+    # Execute Linux command
+    os.execvp("ls", ["ls", "-l"])
+
+else:
+
+    # Parent process
+    print("\nParent is waiting for child")
+
+    # Wait for child process
+    child_pid, status = os.waitpid(pid, 0)
+
+    print("\nChild Process Completed")
+    print("Child PID:", child_pid)
+    print("Exit Status:", os.waitstatus_to_exitcode(status))
+
+#2fcfs
+# FCFS CPU Scheduling
+
+n = int(input("Enter number of processes: "))
+
+if n <= 0:
+    print("Invalid number of processes")
+    exit()
+
+bt = []
+
+# Input burst time
+for i in range(n):
+
+    t = int(input(f"Enter burst time for P{i+1}: "))
+
+    if t <= 0:
+        print("Burst time must be positive")
+        exit()
+
+    bt.append(t)
+
+wt = [0] * n
+tat = [0] * n
+ct = [0] * n
+
+# Calculate waiting time
+for i in range(1, n):
+    wt[i] = wt[i-1] + bt[i-1]
+
+# Calculate turnaround time
+for i in range(n):
+    ct[i] = wt[i] + bt[i]
+    tat[i] = ct[i]
+
+# Display results
+print("\nFCFS Scheduling Results")
+print("\nProcess\tBT\tWT\tTAT\tCT")
+
+for i in range(n):
+    print(f"P{i+1}\t{bt[i]}\t{wt[i]}\t{tat[i]}\t{ct[i]}")
+
+print("\nAverage Waiting Time:", sum(wt)/n)
+print("Average Turnaround Time:", sum(tat)/n)
+
+# Gantt Chart
+print("\nGantt Chart:")
+
+time = 0
+print("0", end="")
+
+for i in range(n):
+    time += bt[i]
+    print(f" | P{i+1} | {time}", end="")
+
+print()
+
+#3 robin
+# Round Robin CPU Scheduling
+
+from collections import deque
+
+n = int(input("Enter number of processes: "))
+
+if n <= 0:
+    print("Invalid number of processes")
+    exit()
+
+bt = []
+
+# Input burst time
+for i in range(n):
+
+    t = int(input(f"Enter burst time for P{i+1}: "))
+
+    if t <= 0:
+        print("Burst time must be positive")
+        exit()
+
+    bt.append(t)
+
+# Input time quantum
+q = int(input("Enter time quantum: "))
+
+if q <= 0:
+    print("Time quantum must be positive")
+    exit()
+
+remaining = bt.copy()
+ct = [0] * n
+queue = deque(range(n))
+
+time = 0
+gantt = []
+
+# Round Robin execution
+while queue:
+
+    i = queue.popleft()
+
+    if remaining[i] > 0:
+
+        run = min(q, remaining[i])
+
+        remaining[i] -= run
+        time += run
+
+        gantt.append((f"P{i+1}", time))
+
+        if remaining[i] == 0:
+            ct[i] = time
+        else:
+            queue.append(i)
+
+# Calculate waiting and turnaround time
+wt = [ct[i] - bt[i] for i in range(n)]
+tat = ct.copy()
+
+# Display results
+print("\nRound Robin Scheduling Results")
+print("\nProcess\tBT\tWT\tTAT\tCT")
+
+for i in range(n):
+    print(f"P{i+1}\t{bt[i]}\t{wt[i]}\t{tat[i]}\t{ct[i]}")
+
+print("\nAverage Waiting Time:", sum(wt)/n)
+print("Average Turnaround Time:", sum(tat)/n)
+
+# Gantt Chart
+print("\nGantt Chart:")
+print("0", end="")
+
+for name, end_time in gantt:
+    print(f" | {name} | {end_time}", end="")
+
+print()
+
+#4 system performance and memory utlization
+import psutil
+import os
+
+print("===== SYSTEM PERFORMANCE ANALYSIS =====")
+
+# CPU Usage
+cpu = psutil.cpu_percent(interval=1)
+
+print("\nCPU Usage:", cpu, "%")
+print("CPU Cores:", psutil.cpu_count())
+
+# Memory Usage
+memory = psutil.virtual_memory()
+
+print("\n===== MEMORY UTILIZATION =====")
+
+print("Total Memory:",
+      round(memory.total / (1024**3), 2), "GB")
+
+print("Used Memory:",
+      round(memory.used / (1024**3), 2), "GB")
+
+print("Available Memory:",
+      round(memory.available / (1024**3), 2), "GB")
+
+print("Memory Usage:", memory.percent, "%")
+
+# Running Processes
+print("\nRunning Processes:", len(psutil.pids()))
+
+# Current Python Process Memory
+process = psutil.Process(os.getpid())
+
+print("Python Program Memory:",
+      round(process.memory_info().rss / (1024**2), 2), "MB")

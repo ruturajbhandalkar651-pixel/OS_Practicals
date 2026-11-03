@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+sem_t rw_sem;
+pthread_mutex_t mutex;
+
+int read_count = 0;
+int shared_data = 0;
+
+// Reader function
+void* reader(void* arg)
+{
+    int id = *(int*)arg;
+
+    // Protect reader count
+    pthread_mutex_lock(&mutex);
+
+    read_count++;
+
+    // First reader locks shared resource
+    if (read_count == 1)
+        sem_wait(&rw_sem);
+
+    pthread_mutex_unlock(&mutex);
+
+    // Reading shared data
+    printf("Reader %d is reading: %d\n", id, shared_data);
+    sleep(1);
+
+    pthread_mutex_lock(&mutex);
+
+    read_count--;
+
+    // Last reader releases shared resource
+    if (read_count == 0)
+        sem_post(&rw_sem);
+
+    pthread_mutex_unlock(&mutex);
+
+    return NULL;
+}
+
+// Writer function
+void* writer(void* arg)
+{
+    int id = *(int*)arg;
+
+    // Get exclusive access
+    sem_wait(&rw_sem);
+
+    shared_data++;
+
+    printf("Writer %d is writing: %d\n", id, shared_data);
+    sleep(1);
+
+    // Release resource
+    sem_post(&rw_sem);
+
+    return NULL;
+}
+
+int main()
+{
+    pthread_t r[3], w[2];
+
+    int rid[3] = {1, 2, 3};
+    int wid[2] = {1, 2};
+
+    // Initialize semaphore and mutex
+    sem_init(&rw_sem, 0, 1);
+    pthread_mutex_init(&mutex, NULL);
+
+    // Create reader threads
+    for (int i = 0; i < 3; i++)
+        pthread_create(&r[i], NULL, reader, &rid[i]);
+
+    // Create writer threads
+    for (int i = 0; i < 2; i++)
+        pthread_create(&w[i], NULL, writer, &wid[i]);
+
+    // Wait for all threads
+    for (int i = 0; i < 3; i++)
+        pthread_join(r[i], NULL);
+
+    for (int i = 0; i < 2; i++)
+        pthread_join(w[i], NULL);
+
+    // Destroy synchronization objects
+    sem_destroy(&rw_sem);
+    pthread_mutex_destroy(&mutex);
+
+    printf("\nAll threads completed successfully.\n");
+
+    return 0;
+}
+
+ctrl s press
+
+in bash=
+gcc readers_writers.c -o readers_writers -pthread && ./readers_writers
